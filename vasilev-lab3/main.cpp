@@ -1,14 +1,45 @@
 
-
 #include <string>
 #include <iostream>
-#include <stack> // сделать свой
-#include <queue> // сделать свой
-//вместо switch можно сделать список(массив) правил
-//базовый класс rool, три метода: перейти, чек и действие
-//сделать отдельными классами лексический, синтаксический анализы и транслятор
+#include <vector>
+//#include <stack>
+//#include <queue>  
 
 using namespace std;
+template<typename T>
+class TVectorQueue
+{
+	size_t head;
+	size_t tail;
+	vector<T> mem;
+public:
+	TVectorQueue() : head(0), tail(0) { } 
+	size_t size() const { return tail - head; } 
+	void push(const T& val) {
+		mem.push_back(val);
+		tail++;
+	}
+	T front() { return mem[head]; }
+	void pop() {
+		head++;
+	}
+	bool empty() const { return head == tail; }
+	
+};
+
+template<typename T>
+class TVectorStack {
+	int Itop;
+	std::vector<T> mem;
+public:
+	TVectorStack() : Itop(-1) {}
+	size_t size() const { return Itop + 1; }
+	bool empty() const { return Itop == -1; }
+	T top() { return mem.back(); }
+	void pop() { mem.pop_back(); Itop--; }
+	void push(const T& val) { mem.push_back(val); Itop++; }
+};
+
 
 enum TypeElement {
 	Operation,
@@ -31,7 +62,7 @@ public:
 	}
 	string getStr() { return str; }
 	TypeElement getType() { return type; }
-	friend ostream& operator << (ostream& out, Lexema& p) {
+	friend ostream& operator << (ostream& out,const Lexema& p) {
 		out << "{" << p.str << ", ";
 		if (p.type == Operation) {
 			out << "operation";
@@ -44,8 +75,8 @@ public:
 	}
 };
 
-queue <Lexema> lex(string input) {
-	queue<Lexema>res;
+TVectorQueue <Lexema> lex(string input) {
+	TVectorQueue<Lexema>res;
 	input += ' ';
 	int i = 0;
 	string tmp = "";
@@ -101,23 +132,23 @@ queue <Lexema> lex(string input) {
 	return res;
 }
 
-void print(queue <Lexema> t) {
+void print(TVectorQueue <Lexema> t) {
 	while (!t.empty()) {
 		cout << t.front() << " ";
 		t.pop();
 	}
 	cout << endl;
 }
-void prints(stack <Lexema> t) {
+void prints(TVectorStack <Lexema> t) {
 	while (!t.empty()) {
-		cout << t.top() << " ";
+		//cout << Lexema(t.top()) << " ";
 		t.pop();
 	}
 	cout << endl;
 }
-queue<Lexema> toPostfix(queue<Lexema> inf) {
-	queue<Lexema> res;
-	stack<Lexema> st;
+TVectorQueue<Lexema> toPostfix(TVectorQueue<Lexema> inf) {
+	TVectorQueue<Lexema> res;
+	TVectorStack<Lexema> st;
 	Lexema lex, stLex;
 	while (!inf.empty()) {
 		lex = inf.front();
@@ -167,9 +198,9 @@ queue<Lexema> toPostfix(queue<Lexema> inf) {
 	}
 	return res;
 }
-double Calcucator(queue <Lexema> synt_res) {
+double Calcucator(TVectorQueue <Lexema> synt_res) {
 	Lexema lex;
-	stack<double> res;
+	TVectorStack<double> res;
 	double roperand;
 	double loperand;
 	while (!synt_res.empty()) {
@@ -207,10 +238,10 @@ int main() {
 	string str = "( 123 -10)/ 50 *	\t	30 \n";
 	//string str = "(15-4)*3";
 	cout << str<< endl;
-	queue <Lexema> lex_res;
+	TVectorQueue <Lexema> lex_res;
 	lex_res = lex(str);
 	print(lex_res);
-	queue<Lexema> synt_res= toPostfix(lex_res);
+	TVectorQueue<Lexema> synt_res= toPostfix(lex_res);
 	cout << "synt_res" << endl;
 	print(synt_res);
 	cout << Calcucator(synt_res);
