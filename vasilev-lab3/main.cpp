@@ -77,6 +77,7 @@ public:
 
 TVectorQueue <Lexema> lex(string input) {
 	TVectorQueue<Lexema>res;
+	TVectorStack <int> sopen;
 	input += ' ';
 	int i = 0;
 	string tmp = "";
@@ -85,10 +86,21 @@ TVectorQueue <Lexema> lex(string input) {
 	int state = 0;
 	for (i = 0; i < input.size(); i++) {
 		char c = input[i];
+		if (c == '(') {
+			sopen.push(i);
+		}
+		if (c == ')') {
+			if (sopen.empty())
+				throw i;
+			else {
+				sopen.pop();
+			}
+		}
 		int fres;
 		switch (state)
 		{
-		case 0: // операция
+		case 0:// операция
+ 
 			if (c >= '0' && c <= '9') {
 				tmp = c;
 				state = 1;
@@ -104,6 +116,7 @@ TVectorQueue <Lexema> lex(string input) {
 			}
 			break;
 		case 1: // число
+
 			if (c >= '0' && c <= '9') {
 				tmp += c;
 				state = 1;
@@ -126,8 +139,13 @@ TVectorQueue <Lexema> lex(string input) {
 				state = 0;
 				break;
 			}
+
+			
 			break;
 		}
+	}
+	if (!(sopen.empty())) {
+		throw sopen.top();
 	}
 	return res;
 }
@@ -235,15 +253,20 @@ double Calcucator(TVectorQueue <Lexema> synt_res) {
 }
 
 int main() {
-	string str = "( 123 -10)/ 50 *	\t	30 \n";
-	//string str = "(15-4)*3";
-	cout << str<< endl;
-	TVectorQueue <Lexema> lex_res;
-	lex_res = lex(str);
-	print(lex_res);
-	TVectorQueue<Lexema> synt_res= toPostfix(lex_res);
-	cout << "synt_res" << endl;
-	print(synt_res);
-	cout << Calcucator(synt_res);
+	try {
+		string str = "(( 123 -10)/ 50 *	\t	30 \n";
+		//string str = "(15-4)*3";
+		cout << str << endl;
+		TVectorQueue <Lexema> lex_res;
+		lex_res = lex(str);
+		print(lex_res);
+		TVectorQueue<Lexema> synt_res = toPostfix(lex_res);
+		cout << "synt_res" << endl;
+		print(synt_res);
+		cout << Calcucator(synt_res);
+	}
+	catch (int r) {
+		cout <<"ERORR  " << r;
+	}
 	return 0;
 }
